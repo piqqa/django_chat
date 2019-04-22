@@ -5,6 +5,6 @@ from django.shortcuts import render
 from django_registration.forms import RegistrationForm
 
 
-@login_required#(login_url='accounts/login')
-def index(request):
-    return render(request, 'chat_gearheart/index.html', {})
+#@login_required#(login_url='accounts/login')
+#def index(request):
+#    return render(request, 'chat_gearheart/index.html', {})
