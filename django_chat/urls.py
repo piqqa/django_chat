@@ -20,4 +20,6 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^chat/', include('chat.urls')),
+    url(r'^accounts/', include('django_registration.backends.one_step.urls')),
+    url('', include('chat_gearheart.urls')),
 ]
