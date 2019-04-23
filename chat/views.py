@@ -21,9 +21,9 @@ def room(request, is_private, room_name):
     private = True if is_private == "private" else False
     if private:
         request_username = request.user.username
-        actual_room_name = actual_room_name + "_"+ request_username if actual_room_name < request_username \
-            else request_username + "_" + actual_room_name
+        actual_room_name = actual_room_name + "|"+ request_username if actual_room_name < request_username \
+            else request_username + "|" + actual_room_name
     return render(request, 'chat/room.html', {
         'room_name_json': mark_safe(json.dumps(actual_room_name)),
-        'is_private': private
+        'is_private': json.dumps(private)
     })

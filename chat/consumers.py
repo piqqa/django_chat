@@ -6,16 +6,25 @@ import json
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.room_group_name ='empty'
+        if self.scope["user"].is_anonymous:
+            self.close()
+            return
         self.username = self.scope["user"].username
-        self.room_group_name = 'chat_%s' % self.room_name
+        if self.checked_privacy():
+            self.room_name = self.room_name.replace('|','_')
+            self.room_group_name = 'chat_%s' % self.room_name
 
-        # Join room group
-        async_to_sync(self.channel_layer.group_add)(
-            self.room_group_name,
-            self.channel_name
-        )
+            # Join room group
+            async_to_sync(self.channel_layer.group_add)(
+                self.room_group_name,
+                self.channel_name
+            )
 
-        self.accept()
+            self.accept()
+
+    def checked_privacy(self):
+        return True
 
     def disconnect(self, close_code):
         # Leave room group
@@ -49,3 +58,14 @@ class ChatConsumer(WebsocketConsumer):
             'message': message,
             'username': username
         }))
+
+
+class PrivateChatConsumer(ChatConsumer):
+    def checked_privacy(self):
+        if self.username not in self.room_name.split('|'):
+            print(self.scope["user"])
+            print(self.username)
+            print(self.room_name)
+            self.close()
+            return False
+        return True
