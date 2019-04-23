@@ -1,6 +1,9 @@
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 import json
+from chat.models import Room, Message
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class ChatConsumer(WebsocketConsumer):
@@ -12,6 +15,13 @@ class ChatConsumer(WebsocketConsumer):
             return
         self.username = self.scope["user"].username
         if self.checked_privacy():
+
+            try:
+                self.room = Room.objects.get(name=self.room_name)
+            except ObjectDoesNotExist:
+                self.room = Room(name=self.room_name)
+                self.room.save()
+
             self.room_name = self.room_name.replace('|','_')
             self.room_group_name = 'chat_%s' % self.room_name
 
@@ -38,6 +48,9 @@ class ChatConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
 
+        user = self.scope["user"]#User.objects.get(username='test')
+        record = Message(room=self.room, text=message, user=user)
+        record.save()
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
